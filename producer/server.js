@@ -11,6 +11,7 @@ var http = require('http'),
 
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
+app.use('/public', express.static(__dirname + '/public'));
 
 producer.on('ready', function () {
 
@@ -19,18 +20,29 @@ producer.on('ready', function () {
     })
 
     app.post('/logger', function(req, res) {
-        var key = Object.keys(req.body)[0];
-        var value = req.body[key];
-        var message = `'${key}':'${value}'`
-            payloads = [
-                { topic: 'test', messages: message },
-            ];
-        producer.send(payloads, function (err, data) {
-            console.log(data);
+        var payload = createPayload(req.body)
+        producer.send(payload, function (err, data) {
+            if (data) {
+                res.send('success');
+                console.log('Data sent to the producer.');
+            }
+            if (err) {
+                res.send('failure');
+                console.log('Data failed to send to the producer.');
+
+            }
         });
     });
 
 });
+
+var createPayload = function (data) {
+    var message = JSON.stringify(data)
+        payload = [
+            { topic: 'test', messages: message },
+        ];
+    return payload;
+}
 
 producer.on('error', function (err) {})
 
