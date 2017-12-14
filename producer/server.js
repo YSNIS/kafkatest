@@ -37,9 +37,10 @@ producer.on('ready', function () {
 });
 
 var createPayload = function (data) {
-    var message = JSON.stringify(data)
+    data.timestamp = Date.now();
+    var message = JSON.stringify(data);
         payload = [
-            { topic: 'test', messages: message },
+            { topic: 'test', messages: message,  timestamp: Date.now() },
         ];
     return payload;
 }
